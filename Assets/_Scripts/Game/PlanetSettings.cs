@@ -13,6 +13,7 @@ namespace Golcon
         public Color TxtColor { get; set; }
         public float Scale { get; set; }
         public int ShipsAmount { get; set;}
-        
+        public float ShipsProductionRate { get; set; }
+
     }
 }

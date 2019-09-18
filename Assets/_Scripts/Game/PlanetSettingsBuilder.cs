@@ -40,6 +40,12 @@ namespace Golcon
 
         }
 
+        public PlanetSettingsBuilder SetShipsProductionRate(float rate)
+        {
+            settings.ShipsProductionRate = rate;
+            return this;
+        }
+
         public static implicit operator PlanetSettings(PlanetSettingsBuilder builder)
         {
             return builder.settings;

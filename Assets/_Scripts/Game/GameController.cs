@@ -23,29 +23,58 @@ namespace Golcon
         #endregion
 #pragma warning disable CS0649
         [SerializeField]PlanetFactory planetFactory;
+        [SerializeField] Color playerColor;
+        [SerializeField] Color neutralColor;
 #pragma warning restore CS0649
 
         Camera cam;
-        Vector3 maxPoint;
-            Vector3 minPoint;
+
+        List<PlanetController> playerPlanets;
         private void Start()
         {
             cam = Camera.main;
-            maxPoint = cam.ViewportToWorldPoint(cam.rect.max);
-            minPoint = cam.ViewportToWorldPoint(cam.rect.min);
-            Debug.Log(minPoint + " " + maxPoint);
-            planetFactory.Initialize();
-            planetFactory.CreateRandomPlanet(transform, minPoint,maxPoint);
+            GenerateGame();
         }
 
 #if DEBUG
         private void Update()
         {
-         if(Input.GetKeyDown(KeyCode.X))
+         if(Input.GetKey(KeyCode.X))
             {
-                planetFactory.CreateRandomPlanet(transform, minPoint, maxPoint);
+                planetFactory.CreateRandomPlanet(transform);
+            }
+
+         if(Input.GetKeyDown(KeyCode.N))
+            {
+                GenerateGame();
             }
         }
 #endif
+
+        private void GenerateMap()
+        {
+            planetFactory.Initialize(cam.ViewportToWorldPoint(cam.rect.min), cam.ViewportToWorldPoint(cam.rect.max));
+            PlanetController planet = planetFactory.CreateRandomPlanet(transform);
+            int i = 0;
+            while (i < 100)
+            {
+                planet = planetFactory.CreateRandomPlanet(transform);
+                i++;
+            }
+        }
+
+        private void GenerateGame()
+        {
+            GenerateMap();
+            PlanetController planet = planetFactory.GetRandomPlanet();
+            PlanetSettings settings = planet.GetSettings();
+            settings._Color = playerColor;
+            settings.ShipsAmount = 50;
+            
+            planet.Setup(settings);
+            playerPlanets = new List<PlanetController>();
+            playerPlanets.Add (planet);
+
+        }
     }
 }
