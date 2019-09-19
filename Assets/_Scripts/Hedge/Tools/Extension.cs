@@ -29,7 +29,7 @@ namespace Hedge
             {
                 string initValue = value.ToString();
                 int num = 0;
-                while (value >= 10000)
+                while (value >= 1000)
                 {
                     num++;
                     value /= 1000;
@@ -37,9 +37,9 @@ namespace Hedge
 
                 string format;
                 if (value % (int)value < 0.1f || value == 0)
-                    format = string.Format("{0:0}{1} ", value, myNum[num]);
+                    format = string.Format("{0:0}{1}", value, myNum[num]);
                 else
-                    format = string.Format("{0:F1}{1} ", value, myNum[num]);
+                    format = string.Format("{0:F1}{1}", value, myNum[num]);
                 return format;
             }
         }

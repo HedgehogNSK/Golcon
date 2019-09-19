@@ -49,7 +49,7 @@ namespace Golcon
             createdPlanets.Clear();
         }
 
-        public PlanetController CreateRandomPlanet(Transform parent)
+        public PlanetController TryCreateRandomPlanet(Transform parent)
         {
             float scale = Random.Range(planetScaleRange.x, planetScaleRange.y);
             PlanetController planet = CreatePlanet();
@@ -60,37 +60,42 @@ namespace Golcon
             planet.Setup(settings);
 
             Vector3 point;
-            if (!TryGetSpawnPoint(planet, out point))
+            if (TryGetSpawnPoint(planet, out point))
+            {
+                planet.transform.position = point;
+                planet.transform.parent = parent;
+
+                return planet;
+            }
+            else
             {
                 DeletePlanet(planet);
                 return null;
             }
-
-            planet.transform.position = point;
-            planet.transform.parent = parent;
-
-
-
-
-            return planet;
         }
 
-        //Brute method of searching spawn points by rule: the new planet must be located on distance of 2 radius or more from another planet
-        //not ideal but fast develop
+        //Brute method of searching spawn points by rule:
         private bool TryGetSpawnPoint(PlanetController planet, out Vector3 point)
         {
             Bounds planetBounds = planet.GetBounds;
             Vector3 minSpawnPoint = minPoint + planetBounds.extents;
             Vector3 maxSpawnPoint = maxPoint - planetBounds.extents;
-            
-            point = new Vector3(Random.Range(minSpawnPoint.x, maxSpawnPoint.x), Random.Range(minSpawnPoint.y, maxSpawnPoint.y), planet.transform.position.z);
-            int i = 0;//looping protection
-            while (!SpawnPointBruteCheck(point, planet) && i < 1000)
+
+            float x = Random.Range(minSpawnPoint.x, maxSpawnPoint.x);
+            float y = Random.Range(minSpawnPoint.y, maxSpawnPoint.y);
+            point = new Vector3(x,y , planet.transform.position.z);
+            Debug.Log(point);
+            int i = 0;
+            const int max = 100;//looping protection
+            while (!SpawnPointBruteCheck(point, planet) && i < max)
             {
-                point = new Vector3(Random.Range(minSpawnPoint.x, maxSpawnPoint.x), Random.Range(minSpawnPoint.y, maxSpawnPoint.y), planet.transform.position.z);
+                x = Random.Range(minSpawnPoint.x, maxSpawnPoint.x);
+                y = Random.Range(minSpawnPoint.y, maxSpawnPoint.y);
+                point = new Vector3(x, y, planet.transform.position.z);
+                Debug.Log(point);
                 i++;
             }
-            if (i < 1000)
+            if (i < max)
             {
                 return true;
             }
@@ -102,13 +107,15 @@ namespace Golcon
 
         }
 
+        // the new planet must be located on distance of 2 radius or more from another planet
+        //not ideal but fast develop
         private bool SpawnPointBruteCheck(Vector3 spawnPoint, PlanetController newPlanet)
         {
             foreach (PlanetController planet in createdPlanets.Except(new PlanetController[] { newPlanet }))
             {
                 float left = (spawnPoint.x - planet.transform.position.x) * (spawnPoint.x - planet.transform.position.x) +
                     (spawnPoint.y - planet.transform.position.y) * (spawnPoint.y - planet.transform.position.y);
-                float right = 4 * (planet.GetBounds.extents.x * newPlanet.GetBounds.extents.x) * (planet.GetBounds.extents.y * newPlanet.GetBounds.extents.y);
+                float right = 4 * (planet.GetBounds.extents.x + newPlanet.GetBounds.extents.x) * (planet.GetBounds.extents.y + newPlanet.GetBounds.extents.y);
                 if (left <= right) return false;
 
             }

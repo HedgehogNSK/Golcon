@@ -12,20 +12,40 @@ namespace Golcon
         [SerializeField] TextMesh txtMesh;
         [SerializeField] SpriteRenderer planetImg;
         [SerializeField] Collider2D planetCollider;
+        [SerializeField] ParticleSystem glowEffect;
+        [SerializeField] GameObject shipPrefab;
 #pragma warning restore CS0649
 
-        public int ShipsAmount { get; protected set; }
-        public int ShipsProductionRate { get; protected set; }
+        private int shipsAmount;
+        public int ShipsAmount { get { return shipsAmount; }
+            protected set {
+                if(value<0)
+                {
+                    Debug.LogError("Amount of ships can't lesser than 0");
+                    return;
+                }
+                shipsAmount = value;
+                txtMesh.text =((float)ShipsAmount).ToShortNumber();
+            } }
+        public float ShipsProductionRate { get; protected set; }
 
+        Coroutine production;
+        public void Start()
+        {
+            SetMarked(false);
+            production = StartCoroutine(EachSecondShipsProduction());
+        }
         public void Setup(PlanetSettings settings)
         {
             planetImg.color = settings._Color;
 
-            planetImg.transform.localScale = Vector3.one * settings.Scale;
+            planetImg.transform.localScale = 
+                glowEffect.transform.localScale = Vector3.one * settings.Scale;
+             
 
             ShipsAmount = settings.ShipsAmount;
+            ShipsProductionRate = settings.ShipsProductionRate;
             
-            txtMesh.text = ShipsAmount > 0 ? ShipsAmount.ToString() : "";
             txtMesh.color = settings.TxtColor;
 
         }
@@ -40,6 +60,40 @@ namespace Golcon
         }
 
         public Bounds GetBounds=> planetCollider.bounds;
+
+        public bool IsSelected { get; private set; }
+        public void SetMarked(bool on)
+        {
+            IsSelected = on;
+            if (on)
+            {
+                glowEffect.Play();              
+            }
+            else
+            {
+                glowEffect.Stop();
+            }
+        }
+               
+        private IEnumerator EachSecondShipsProduction()
+        {
+            float currentProgress = 0;
+
+            while (true)
+            {
+                yield return new WaitForSeconds(1);
+
+                currentProgress += ShipsProductionRate;
+                ShipsAmount += (int)currentProgress;
+                currentProgress -= (int)currentProgress;
+            }
+        }
         
+        public void Attack(PlanetController other)
+        {
+            int battleShips = ShipsAmount / 2;
+            ShipsAmount -= battleShips;
+            
+        }
     }
 }

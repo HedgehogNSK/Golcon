@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 namespace Golcon
 {
- 
     public class PlanetSettings 
     {
        

@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _planetPrefab: {fileID: 5656604757990145667, guid: d4f3f4be156810a41b1d13f5650f633c,
     type: 3}
-  planetScaleRange: {x: 0.3, y: 0.8}
+  planetScaleRange: {x: 0.4, y: 0.9}
   planeEscadrilleAmountRange: {x: 25, y: 150}
