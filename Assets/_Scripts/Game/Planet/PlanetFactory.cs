@@ -31,6 +31,9 @@ namespace Golcon
         {
             PlanetController planet = Instantiate(_planetPrefab);
             createdPlanets.Add(planet);
+
+            planet.gameObject.name = "Planet " + createdPlanets.Count;
+
             return planet;
         }
 
@@ -57,6 +60,7 @@ namespace Golcon
 
             settings.Scale = scale;
             settings.ShipsAmount = (int)Random.Range(planeEscadrilleAmountRange.x, planeEscadrilleAmountRange.y);
+            settings.OwnerID = 0;
             planet.Setup(settings);
 
             Vector3 point;
@@ -84,7 +88,7 @@ namespace Golcon
             float x = Random.Range(minSpawnPoint.x, maxSpawnPoint.x);
             float y = Random.Range(minSpawnPoint.y, maxSpawnPoint.y);
             point = new Vector3(x,y , planet.transform.position.z);
-            Debug.Log(point);
+            //Debug.Log(point);
             int i = 0;
             const int max = 100;//looping protection
             while (!SpawnPointBruteCheck(point, planet) && i < max)
@@ -92,18 +96,16 @@ namespace Golcon
                 x = Random.Range(minSpawnPoint.x, maxSpawnPoint.x);
                 y = Random.Range(minSpawnPoint.y, maxSpawnPoint.y);
                 point = new Vector3(x, y, planet.transform.position.z);
-                Debug.Log(point);
                 i++;
             }
             if (i < max)
             {
                 return true;
             }
-            else
-            {
-                Debug.LogError("Couldn't find free place");
-                return false;
-            }
+            
+             //Debug.LogError("Couldn't find free place");
+             return false;
+            
 
         }
 
@@ -111,7 +113,7 @@ namespace Golcon
         //not ideal but fast develop
         private bool SpawnPointBruteCheck(Vector3 spawnPoint, PlanetController newPlanet)
         {
-            foreach (PlanetController planet in createdPlanets.Except(new PlanetController[] { newPlanet }))
+            foreach (PlanetController planet in createdPlanets.Where(other => other != newPlanet))
             {
                 float left = (spawnPoint.x - planet.transform.position.x) * (spawnPoint.x - planet.transform.position.x) +
                     (spawnPoint.y - planet.transform.position.y) * (spawnPoint.y - planet.transform.position.y);

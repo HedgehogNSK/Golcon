@@ -44,21 +44,25 @@ namespace Golcon
 
         private void InteractWithPlanet(PlanetController clicked)
         {
-            if (playersPlanets.Contains(clicked))
+            if (clicked != null)
             {
-                Debug.Log("This is players planet");
-                clicked.SetMarked(true);
-                
+                if (playersPlanets.Contains(clicked))
+                {
+                    clicked.SetMarked(true);
+                }
+                else
+                {
+                    foreach (var planet in playersPlanets.Where(planet => planet.IsSelected))
+                    {
+                        planet.Attack(clicked);
+                    }
+                }
             }
             foreach (var planet in playersPlanets.Where(other => other != clicked))
             {
                 planet.SetMarked(false);
             }
 
-            foreach (var planet in playersPlanets.Where(planet => planet.IsSelected))
-            {
-                planet.Attack(clicked);
-            }
         }
 
 #if DEBUG
@@ -79,31 +83,57 @@ namespace Golcon
         private void GenerateMap()
         {
             planetFactory.Initialize(cam.ViewportToWorldPoint(cam.rect.min), cam.ViewportToWorldPoint(cam.rect.max));
-            PlanetController planet = planetFactory.TryCreateRandomPlanet(transform);
+            PlanetController planet;
+            
             int i = 0;
             while (i < 10)
             {
                 planet = planetFactory.TryCreateRandomPlanet(transform);
+                if (planet != null)
+                    planet.OwnerChanged += OwnerOfPlanetChanged;
                 i++;
             }
+        }
+
+        private void OwnerOfPlanetChanged(PlanetController planet, int owner_id)
+        {
+            if(playersPlanets[0].OwnerID == owner_id)
+            {
+                PlayerOwnedPlanet(planet);
+            }
+            else
+            {
+                if(playersPlanets.Contains(planet))
+                {
+                    playersPlanets.Remove(planet);
+                }
+            }
+
+            
         }
 
         private void GenerateGame()
         {
             GenerateMap();
-            PlanetController planet = planetFactory.GetRandomPlanet();
+            PlanetController rndPlanet = planetFactory.GetRandomPlanet();
+            playersPlanets = new List<PlanetController>();
+            PlayerOwnedPlanet(rndPlanet);
+
+            PlanetSettings settings = rndPlanet.GetSettings();
+            settings.ShipsAmount = playerBaseShips;
+            rndPlanet.Setup(settings);
+
+        }
+
+        private void PlayerOwnedPlanet(PlanetController planet)
+        {
             PlanetSettings settings = planet.GetSettings();
             settings._Color = playerColor;
-            settings.ShipsAmount = playerBaseShips;
             settings.ShipsProductionRate = playerShipsProductionRate;
-
+            settings.OwnerID = 1;
             planet.Setup(settings);
-
-            playersPlanets = new List<PlanetController>();
-            playersPlanets.Add(planet);
             
-            choosenPlanets = new List<PlanetController>();  
-
+            playersPlanets.Add(planet);
         }
     }
 }

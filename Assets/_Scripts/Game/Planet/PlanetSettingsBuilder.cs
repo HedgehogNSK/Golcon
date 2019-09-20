@@ -46,6 +46,12 @@ namespace Golcon
             return this;
         }
 
+        public PlanetSettingsBuilder SetOwner(int id)
+        {
+            settings.OwnerID = id;
+            return this;
+        }
+
         public static implicit operator PlanetSettings(PlanetSettingsBuilder builder)
         {
             return builder.settings;

@@ -13,6 +13,7 @@ namespace Golcon
         public float Scale { get; set; }
         public int ShipsAmount { get; set;}
         public float ShipsProductionRate { get; set; }
+        public int OwnerID { get; set; }
 
     }
 }
