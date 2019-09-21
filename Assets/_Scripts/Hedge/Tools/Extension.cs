@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Hedge
 {
@@ -43,5 +44,15 @@ namespace Hedge
                 return format;
             }
         }
+        public static class VectorExtension
+        {
+            public static Vector2 Rotate(this Vector2 vector, float angle)
+            {
+                float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+                float sin = Mathf.Sin(angle * Mathf.Deg2Rad);
+                return new Vector2(cos * vector.x - sin * vector.y, sin * vector.x + cos * vector.y);
+            }
+        }
+
     }
 }

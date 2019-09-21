@@ -3,22 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Hedge.Tools;
 
 namespace Golcon
 {
 
     public class ShipController : MonoBehaviour
     {
+        [SerializeField] float speed = 5;
+        [SerializeField] LayerMask planetLayer;
         Collider2D shipCollider;
         SpriteRenderer sprite;
         Rigidbody2D rigid;
-
-        private PlanetController target;
-        public PlanetController Target => target;
-        int owner_id;
-        public int OwnerID => owner_id;
-        [SerializeField] float speed = 5;
-
+        public PlanetController Target { get; private set; }        
+        public int OwnerID { get; private set; }      
+        public int Damage { get; private set; }
 
         bool initialized = false;
         private void Awake()
@@ -32,10 +31,11 @@ namespace Golcon
         {
 
         }
-        public void Init(int owner_id, PlanetController target)
+        public void Init(int owner_id, PlanetController target, int damage)
         {
-            this.owner_id = owner_id;
-            this.target = target;
+            OwnerID = owner_id;
+            Target = target;
+            Damage = damage;
             initialized = true;
         }
 
@@ -59,15 +59,14 @@ namespace Golcon
             {
                 Explode();
                 return;
-            }
-           
+            }           
            
             Vector3 targetPosition = Target.transform.position;
             Vector2 newVel = (targetPosition - transform.position).normalized * speed;
                         
             RaycastHit2D[] raycastHits = new RaycastHit2D[1];
-            float raycastDist = shipCollider.bounds.size.y * 3;
-            shipCollider.Raycast(newVel, raycastHits, raycastDist);
+            float raycastDist = shipCollider.bounds.size.y * 5;
+            shipCollider.Raycast(newVel, raycastHits, raycastDist, planetLayer);
 
             if (raycastHits[0].collider !=null)
             {
@@ -90,10 +89,9 @@ namespace Golcon
                     {
                         angle = -angle;
                     }
-                    tmpVel = Rotate(newVel, angle);
+                    tmpVel = newVel.Rotate(angle);
                     raycastHits = new RaycastHit2D[1];
-                    shipCollider.Raycast(tmpVel, raycastHits, raycastDist);
-                    Debug.DrawRay(transform.position, tmpVel);
+                    shipCollider.Raycast(tmpVel, raycastHits, raycastDist, planetLayer);
                     if (raycastHits[0].collider != null)
                         planet = raycastHits[0].collider.GetComponent<PlanetController>();
 
@@ -105,19 +103,12 @@ namespace Golcon
 
             cachedPosition = transform.position;
 
-        }
-
-        private Vector2 Rotate(Vector2 vector, float angle)
-        {
-            float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
-            float sin = Mathf.Sin(angle * Mathf.Deg2Rad);
-            return new Vector2(cos * vector.x - sin * vector.y, sin * vector.x + cos * vector.y);
-        }
+        }       
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
             PlanetController planetOnTheWay = collision.gameObject.GetComponentInParent<PlanetController>();
-            if (planetOnTheWay != null && planetOnTheWay == target)
+            if (planetOnTheWay != null && planetOnTheWay == Target)
             {
                 Explode();
             }

@@ -24,14 +24,9 @@ namespace Golcon
         CircleCollider2D planetCollider;
         private int shipsAmount;
         public int ShipsAmount { get { return shipsAmount; }
-            protected set {
-                if(value<0)
-                {
-                    Debug.LogError("Amount of ships can't lesser than 0");
-                    return;
-                }
+            protected set {               
                 shipsAmount = value;
-                txtMesh.text =((float)ShipsAmount).ToShortNumber();
+                txtMesh.text =((float)shipsAmount).ToShortNumber();
             } }
         public float ShipsProductionRate { get; protected set; }
        
@@ -112,37 +107,64 @@ namespace Golcon
         public void Attack(PlanetController other)
         {
             //Debug.Log(other.gameObject.name);
-            int battleShips = ShipsAmount / 2;
-            ShipsAmount -= battleShips;
+            int totalDamage = ShipsAmount / 2;
+            ShipsAmount -= totalDamage;
 
-            StartCoroutine(SendShips2Target(battleShips, other));
+            StartCoroutine(SendShips2Target(totalDamage, other));
             
         }
 
-        private IEnumerator SendShips2Target(int amount, PlanetController target)
+        private IEnumerator SendShips2Target(int totalDamage, PlanetController target)
         {
 
 #if DEBUG
             int j = 0;
 #endif
-            for (int i = 0; i < (amount> maxShipsSending ? maxShipsSending : amount); i++)
+            int damagePerShip = 1;
+             ShipController ship;
+            
+            if(totalDamage >maxShipsSending)
             {
-                Vector3 targetPos = target.transform.position;
-                Vector3 instantiatePoint = planetCollider.ClosestPoint(targetPos);
+                damagePerShip = totalDamage / maxShipsSending;
 
+                int undividableDmg = totalDamage % maxShipsSending;
 
-                ShipController ship = Instantiate(shipPrefab);
-                ship.transform.position = instantiatePoint;
-                ship.Init(OwnerID, target);
+                if (undividableDmg != 0)
+                {
+                    ship = CreateShip(target, undividableDmg);
+                }
+            }
+
+          
+            for (int i = 0; i < (totalDamage> maxShipsSending ? maxShipsSending : totalDamage); i++)
+            {
+                ship = CreateShip(target, damagePerShip);
 #if DEBUG
                 j++;
                 ship.gameObject.name = "Ship " + j;
 #endif
-                if (i % shipsSendingPerFrame == 0)                
+                if (i % shipsSendingPerFrame == 0)
                     yield return new WaitForFixedUpdate();
-                
+
             }
-           
+
+
+        }
+
+        private ShipController CreateShip(PlanetController target, int damage)
+        {
+            Vector3 targetPos;
+            Vector3 instantiatePoint;
+
+            targetPos = target.transform.position;
+            instantiatePoint = planetCollider.ClosestPoint(targetPos);
+
+            ShipController newShip;
+            newShip = Instantiate(shipPrefab);
+            newShip.transform.position = instantiatePoint;
+            newShip.Init(OwnerID, target, damage);
+
+            return newShip;
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -152,7 +174,7 @@ namespace Golcon
             if (ship.Target != this) return;
             if(ship.OwnerID != OwnerID)
             {
-                ShipsAmount--;
+                ShipsAmount-=ship.Damage;
                 if (ShipsAmount<=0)
                 {
                     OwnerID = ship.OwnerID;
@@ -162,7 +184,7 @@ namespace Golcon
             }
             else
             {
-                ShipsAmount++;
+                ShipsAmount+= ship.Damage;
             }
         }
 

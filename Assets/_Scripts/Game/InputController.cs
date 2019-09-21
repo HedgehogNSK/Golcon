@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Golcon
 {
@@ -11,6 +12,7 @@ namespace Golcon
 
         Camera cam;
         readonly Vector2 zero = new Vector2(0f, 0f);
+
 
         private void Start()
         {
@@ -30,7 +32,6 @@ namespace Golcon
             else
                 OnClick?.Invoke(null);
         }
-
 
     }
 }
