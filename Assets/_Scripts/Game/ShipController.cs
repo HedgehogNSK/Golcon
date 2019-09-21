@@ -22,7 +22,7 @@ namespace Golcon
         bool initialized = false;
         private void Awake()
         {
-            shipCollider = GetComponentInChildren<Collider2D>();
+            shipCollider = GetComponent<Collider2D>();
             sprite = GetComponentInChildren<SpriteRenderer>();
             rigid = GetComponent<Rigidbody2D>();
         }
@@ -120,5 +120,7 @@ namespace Golcon
 
             Destroy(gameObject);
         }
+
+        public Bounds GetBounds => shipCollider.bounds;
     }
 }

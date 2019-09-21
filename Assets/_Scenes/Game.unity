@@ -151,7 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   planetFactory: {fileID: 11400000, guid: 8ef34a4e16986bf428fb2cec663d8d78, type: 2}
   playerColor: {r: 0.24056602, g: 0.4083064, b: 1, a: 0.98039216}
-  playerBaseShips: 50
+  playerBaseShips: 500
   playerShipsProductionRate: 5
   neutralColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &78670318
