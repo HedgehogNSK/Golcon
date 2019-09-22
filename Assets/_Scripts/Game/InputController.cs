@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 namespace Golcon
 {
-    public class InputController : MonoBehaviour, IPointerClickHandler
+    public class InputController : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
+        [SerializeField] Image dragRectangle;
+
         static public event System.Action<PlanetController> OnClick;
 
         Camera cam;
@@ -33,5 +35,25 @@ namespace Golcon
                 OnClick?.Invoke(null);
         }
 
+        Vector2 startPosition;
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            startPosition = eventData.position;
+            dragRectangle.rectTransform.position = startPosition;
+            dragRectangle.gameObject.SetActive(true);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            float x = eventData.position.x - startPosition.x;
+            float y = startPosition.y - eventData.position.y;
+            dragRectangle.rectTransform.sizeDelta = new Vector2(Mathf.Abs(x),Mathf.Abs(y) );
+            dragRectangle.rectTransform.localScale = new Vector2(x < 0 ? -1 : 1, y < 0 ? -1 : 1);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            dragRectangle.gameObject.SetActive(false);
+        }
     }
 }

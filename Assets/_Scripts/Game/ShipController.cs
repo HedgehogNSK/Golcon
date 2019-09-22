@@ -10,8 +10,13 @@ namespace Golcon
 
     public class ShipController : MonoBehaviour
     {
+#pragma warning disable CS0649
         [SerializeField] float speed = 5;
+        [Range(0.01f,1f)]
+        [SerializeField] float speedDampingOnObstacle = 0.7f;
         [SerializeField] LayerMask planetLayer;
+#pragma warning restore CS0649
+
         Collider2D shipCollider;
         SpriteRenderer sprite;
         Rigidbody2D rigid;
@@ -73,31 +78,33 @@ namespace Golcon
                 PlanetController planet;
                 planet = raycastHits[0].collider.GetComponent<PlanetController>();
 
-                float deltaAngle = 5;
-                float angle = deltaAngle;
-                Vector2 tmpVel = newVel;
-
-                //loop turns raycasts around the ship to find free way to fly around unwanted planet
-                for (int i = 0; angle <= 90 && raycastHits[0].collider != null && planet != null && planet != Target; i++)
+                if (planet != Target)
                 {
+                    float deltaAngle = 5;
+                    float angle = deltaAngle;
+                    Vector2 tmpVel = newVel;
 
-                    if (i % 2 == 0)
+                    //loop turns raycasts around the ship to find free way to fly around unwanted planet
+                    for (int i = 0; angle <= 90 && raycastHits[0].collider != null && planet != null && planet != Target; i++)
                     {
-                        angle += Mathf.Sign(angle)*deltaAngle;
-                    }
-                    else
-                    {
-                        angle = -angle;
-                    }
-                    tmpVel = newVel.Rotate(angle);
-                    raycastHits = new RaycastHit2D[1];
-                    shipCollider.Raycast(tmpVel, raycastHits, raycastDist, planetLayer);
-                    if (raycastHits[0].collider != null)
-                        planet = raycastHits[0].collider.GetComponent<PlanetController>();
 
+                        if (i % 2 == 0)
+                        {
+                            angle += Mathf.Sign(angle) * deltaAngle;
+                        }
+                        else
+                        {
+                            angle = -angle;
+                        }
+                        tmpVel = newVel.Rotate(angle);
+                        raycastHits = new RaycastHit2D[1];
+                        shipCollider.Raycast(tmpVel, raycastHits, raycastDist, planetLayer);
+                        if (raycastHits[0].collider != null)
+                            planet = raycastHits[0].collider.GetComponent<PlanetController>();
+
+                    }
+                    newVel = tmpVel * speedDampingOnObstacle;
                 }
-                newVel = tmpVel;
-
             }
             rigid.velocity = newVel;
 
