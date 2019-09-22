@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -38,8 +39,25 @@ namespace Golcon
         {
             cam = Camera.main;
             InputController.OnClick += InteractWithPlanet;
+            InputController.OnSelectArea += SelectPlanets;
             GenerateGame();
 
+        }
+
+        private void SelectPlanets(Rect selectArea)
+        {
+            Debug.Log(selectArea);
+            foreach(var planet in playersPlanets)
+            {
+              if(selectArea.Contains(planet.transform.position,true))
+                {
+                    planet.SetMarked(true);
+                }
+                else
+                {
+                    planet.SetMarked(false);
+                }
+            }
         }
 
         private void InteractWithPlanet(PlanetController clicked)
