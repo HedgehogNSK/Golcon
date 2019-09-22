@@ -375,6 +375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f10663f71d4fee4087118cc1dae311d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dragRectangle: {fileID: 1021579263}
 --- !u!114 &1274453890
 MonoBehaviour:
   m_ObjectHideFlags: 0
